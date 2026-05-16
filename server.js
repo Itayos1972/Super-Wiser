@@ -16,7 +16,7 @@ app.post('/api/chat', async (req, res) => {
   try {
     const { messages, system, max_tokens } = req.body;
     const response = await anthropic.messages.create({
-      model: "claude-3-haiku-20240307",
+      model: "claude-3-sonnet-20240229",
       max_tokens: max_tokens || 1000,
       system: system,
       messages: messages,
