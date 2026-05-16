@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 
 app.use(express.json({ limit: '10mb' }));
-app.use(express.static('.'));
+app.get('/', (req, res) => res.sendFile(__dirname + '/super_wiser.html'));
 
 app.post('/api/chat', async (req, res) => {
   try {
