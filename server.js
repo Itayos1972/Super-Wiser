@@ -14,6 +14,19 @@ const anthropic = new Anthropic({
 
 app.post('/api/chat', async (req, res) => {
   try {
+    const { messages, system, max_tokens } = req.body;
+    const response = await anthropic.messages.create({
+      model: "claude-3-haiku-20240307",
+      max_tokens: max_tokens || 1000,
+      system: system,
+      messages: messages,
+    });
+    res.json(response);
+  } catch (error) {
+    console.error("Claude Error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
     const { model, messages, system, max_tokens } = req.body;
 
     const response = await anthropic.messages.create({
