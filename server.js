@@ -1,26 +1,36 @@
 const express = require('express');
-const app = express();
+const cors = require('cors');
+const { Anthropic } = require('@anthropic-ai/sdk');
+require('dotenv').config();
 
-app.use(express.json({ limit: '10mb' }));
-app.get('/', (req, res) => res.sendFile(__dirname + '/super_wiser.html'));
+const app = express();
+app.use(cors());
+app.use(express.json());
+app.use(express.static('.'));   // מגיש את ה-HTML
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+});
 
 app.post('/api/chat', async (req, res) => {
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify(req.body)
+    const { model, messages, system, max_tokens } = req.body;
+
+    const response = await anthropic.messages.create({
+      model: model || "claude-3-5-haiku-20241022",   // מודל תקין וזול
+      max_tokens: max_tokens || 1000,
+      system: system,
+      messages: messages,
     });
-    const data = await response.json();
-    res.json(data);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+
+    res.json(response);
+  } catch (error) {
+    console.error("Claude Error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log('Super Wiser running on port ' + PORT));
+app.listen(PORT, () => {
+  console.log(`🚀 Super Wiser רץ על פורט ${PORT}`);
+});
