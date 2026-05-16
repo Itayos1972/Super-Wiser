@@ -1,49 +1,29 @@
 const express = require('express');
 const cors = require('cors');
-const { Anthropic } = require('@anthropic-ai/sdk');
-require('dotenv').config();
-
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.static('.'));   // מגיש את ה-HTML
-
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+app.use(express.static('.'));
 
 app.post('/api/chat', async (req, res) => {
-  try {
-    const { messages, system, max_tokens } = req.body;
-    const response = await anthropic.messages.create({
-      model: "claude-3-sonnet-20240229",
-      max_tokens: max_tokens || 1000,
-      system: system,
-      messages: messages,
-    });
-    res.json(response);
-  } catch (error) {
-    console.error("Claude Error:", error);
-    res.status(500).json({ error: error.message });
+  const { messages } = req.body;
+  const lastMessage = messages[messages.length - 1].content.toLowerCase();
+  
+  let reply = "וואו! ספרו לי עוד על זה! 🦉";
+  
+  if (lastMessage.includes("בעיה") || lastMessage.includes("ציפורים")) {
+    reply = "איזו בעיה של ציפורים בחרתם? ספרו לי הכל! 🐦";
+  } else if (lastMessage.includes("כוח") || lastMessage.includes("על")) {
+    reply = "אילו כוחות מיוחדים תרצו שהגיבור יהיה? ✨";
+  } else if (lastMessage.includes("גיבור") || lastMessage.includes("שם")) {
+    reply = "איזה שם מגניב תרצו לגיבור? ואיך הוא נראה? 🦸‍♂️";
+  } else if (lastMessage.includes("תודה") || lastMessage.includes("סיימנו")) {
+    reply = "אתם מדהימים! כל הכבוד על המיזם שלכם! 🌟";
   }
-});
-    const { model, messages, system, max_tokens } = req.body;
-
-    const response = await anthropic.messages.create({
-      model: model || "claude-3-5-haiku-20241022",   // מודל תקין וזול
-      max_tokens: max_tokens || 1000,
-      system: system,
-      messages: messages,
-    });
-
-    res.json(response);
-  } catch (error) {
-    console.error("Claude Error:", error);
-    res.status(500).json({ error: error.message });
-  }
+  
+  res.json({
+    content: [{ text: reply }]
+  });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 Super Wiser רץ על פורט ${PORT}`);
-});
+app.listen(process.env.PORT || 3000);
